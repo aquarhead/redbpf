@@ -9,6 +9,7 @@ use crate::CommandError;
 
 use futures::stream::StreamExt;
 use hexdump::hexdump;
+use log::debug;
 use redbpf::xdp;
 use redbpf::{load::Loader, Program::*};
 use std::path::PathBuf;
@@ -24,12 +25,14 @@ pub fn load(
 ) -> Result<(), CommandError> {
     let mut runtime = Runtime::new().unwrap();
     runtime.block_on(async {
+        debug!("loading from file");
         // Load all the programs and maps included in the program
         let mut loader = Loader::load_file(&program).expect("error loading file");
 
         // attach the programs
         for program in loader.module.programs.iter_mut() {
             let name = program.name().to_string();
+            debug!("attaching program {}: {:?}", &name, &program);
             let ret = match program {
                 XDP(prog) => {
                     let iface = match interface {
@@ -40,6 +43,7 @@ pub fn load(
                             ))
                         }
                     };
+                    debug!("attaching xdp {}", &prog.name());
                     prog.attach_xdp(&iface, xdp::Flags::default())
                 }
                 KProbe(prog) | KRetProbe(prog) => prog.attach_kprobe(&name, 0),
@@ -61,9 +65,12 @@ pub fn load(
                     "failed to attach program {}: {:?}",
                     name, e
                 )));
+            } else {
+                debug!("attached {}", &name);
             }
         }
 
+        debug!("starting userspace event receiver");
         // dump all the generated events on stdout
         tokio::spawn(async move {
             while let Some((name, events)) = loader.events.next().await {
@@ -76,7 +83,7 @@ pub fn load(
 
         // quit on SIGINT
         let _ = signal::ctrl_c().await;
-        println!("exiting");
+        debug!("exit on Ctrl-C");
         Ok(())
     })
 }

@@ -137,6 +137,8 @@ use std::path::PathBuf;
 use cargo_bpf_lib as cargo_bpf;
 
 fn main() {
+    env_logger::init();
+
     let matches =
         App::new("cargo")
             .bin_name("cargo")
@@ -204,6 +206,13 @@ fn main() {
                             .arg(Arg::with_name("PROGRAM").required(true).help(
                                 "Loads the specified eBPF program and outputs all the events generated",
                             ))
+                    )
+                    .subcommand(
+                        SubCommand::with_name("parse")
+                            .about("Parse the specifeid file")
+                            .arg(Arg::with_name("PROGRAM").required(true).help(
+                                "Parse the specified RedBPF package and output data structures for debugging",
+                            ))
                     ),
             )
             .get_matches();
@@ -250,6 +259,12 @@ fn main() {
         let uprobe_path = m.value_of("UPROBE_PATH");
         let uprobe_pid = m.value_of("PID").map(|p| p.parse::<i32>().unwrap());
         if let Err(e) = cargo_bpf::load(&program, interface, uprobe_path, uprobe_pid) {
+            clap::Error::with_description(&e.0, clap::ErrorKind::InvalidValue).exit()
+        }
+    }
+    if let Some(m) = matches.subcommand_matches("parse") {
+        let program = m.value_of("PROGRAM").map(PathBuf::from).unwrap();
+        if let Err(e) = cargo_bpf::parse(&program) {
             clap::Error::with_description(&e.0, clap::ErrorKind::InvalidValue).exit()
         }
     }

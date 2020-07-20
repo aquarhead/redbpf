@@ -4,7 +4,10 @@ version = "1.0.0"
 description = "Cargo plugin to manage eBPF probes using redbpf"
 repository = "https://github.com/redsift/redbpf"
 documentation = "https://ingraind.org/api//cargo_bpf/"
-authors = ["Alessandro Decina <alessandro.d@gmail.com>", "Peter Parkanyi <peter@redsift.io>"]
+authors = [
+  "Alessandro Decina <alessandro.d@gmail.com>",
+  "Peter Parkanyi <peter@redsift.io>",
+]
 edition = "2018"
 keywords = ["cargo", "redbpf", "bpf", "plugin", "subcommand"]
 categories = ["development-tools::cargo-plugins"]
@@ -23,12 +26,14 @@ futures = { version = "0.3", optional = true }
 tokio = { version = "0.2.4", features = ["rt-core", "io-driver", "macros", "signal"], optional = true }
 hexdump = { version = "0.1", optional = true }
 libc = "0.2.66"
-llvm-sys = "90"
+llvm-sys = "100"
 syn = { version = "1.0", features = ["full", "visit"] }
 quote = "1.0"
 proc-macro2 = "1.0"
 tempfile = "3.1"
 lazy_static = "1.0"
+log = "0.4"
+env_logger = "0.7"
 
 [features]
 default = ["command-line"]

@@ -17,6 +17,8 @@ mod load;
 mod new;
 #[cfg(feature = "command-line")]
 mod new_program;
+#[cfg(feature = "command-line")]
+mod parse;
 
 pub struct CommandError(pub String);
 
@@ -35,3 +37,5 @@ pub use load::load;
 pub use new::new;
 #[cfg(feature = "command-line")]
 pub use new_program::new_program;
+#[cfg(feature = "command-line")]
+pub use parse::parse;

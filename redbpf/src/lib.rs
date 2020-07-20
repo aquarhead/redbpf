@@ -85,6 +85,7 @@ pub type DataPtr = *const i8;
 #[cfg(target_arch = "x86_64")]
 pub type MutDataPtr = *mut i8;
 
+#[derive(Debug)]
 pub struct Module {
     pub programs: Vec<Program>,
     pub maps: Vec<Map>,
@@ -92,6 +93,7 @@ pub struct Module {
     pub version: u32,
 }
 /// A BPF program defined in a [Module](struct.Module.html).
+#[derive(Debug)]
 pub enum Program {
     KProbe(KProbe),
     KRetProbe(KProbe),
@@ -102,6 +104,7 @@ pub enum Program {
     XDP(XDP),
 }
 
+#[derive(Debug)]
 struct ProgramData {
     pub name: String,
     code: Vec<bpf_insn>,
@@ -109,31 +112,37 @@ struct ProgramData {
 }
 
 /// Type to work with `kprobes` or `kretprobes`.
+#[derive(Debug)]
 pub struct KProbe {
     common: ProgramData,
     attach_type: bpf_probe_attach_type,
 }
 
 /// Type to work with `uprobes` or `uretprobes`.
+#[derive(Debug)]
 pub struct UProbe {
     common: ProgramData,
     attach_type: bpf_probe_attach_type,
 }
 
 /// Type to work with `socket filters`.
+#[derive(Debug)]
 pub struct SocketFilter {
     common: ProgramData,
 }
 
+#[derive(Debug)]
 pub struct TracePoint {
     common: ProgramData,
 }
 /// Type to work with `XDP` programs.
+#[derive(Debug)]
 pub struct XDP {
     common: ProgramData,
     interface: Option<String>,
 }
 
+#[derive(Debug)]
 pub struct Map {
     pub name: String,
     pub kind: u32,
@@ -141,6 +150,7 @@ pub struct Map {
     config: bpf_map_def,
 }
 
+#[derive(Debug)]
 pub struct HashMap<'a, K: Clone, V: Clone> {
     base: &'a Map,
     _k: PhantomData<K>,
@@ -148,6 +158,7 @@ pub struct HashMap<'a, K: Clone, V: Clone> {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Rel {
     shndx: usize,
     target: usize,
@@ -548,6 +559,9 @@ impl Module {
                 _ => {}
             }
         }
+
+        log::debug!("programs: {:?}", &programs);
+        log::debug!("rels: {:?}", &rels);
 
         // Rewrite programs with relocation data
         for rel in rels.iter() {
